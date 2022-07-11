@@ -32,6 +32,6 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
     - name: Build with Gradle
-      uses: gradle wrapper
+      uses: gradle wrapper --gradle-version 6.2 --distribution-type all
       with:
         arguments: build
