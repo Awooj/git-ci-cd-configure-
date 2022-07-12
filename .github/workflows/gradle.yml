@@ -19,11 +19,8 @@ permissions:
 jobs:
   build:
 
-    runs-on: ${{matrix.os}}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-
+    runs-on: ubuntu-latest
+    
     steps:
     - uses: actions/checkout@v3
     - name: Set up JDK 11
@@ -31,7 +28,24 @@ jobs:
       with:
         java-version: '11'
         distribution: 'temurin'
+    - name: Grant execute perimssions for gradlew
+      run: chmod +x gradlew
     - name: Build with Gradle
-      uses: gradle wrapper --gradle-version 6.2 --distribution-type all
+      uses: ./gradlew build
       with:
         arguments: build
+        
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+    -  name: Build and push
+       uses: docker/build-push-action@v3
+       with:
+          image: awooj/hello
+          registry: docker.io
+          context: .
+          push: true
+          tags: user/app:latest
